@@ -1,0 +1,8 @@
+{
+  "name": "Cavtory",
+  "description": "A smart home inventory management system with barcode image recognition and automated tracking for Cooking, Home Cleaning, Personal Care, and Botiquín supplies.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
