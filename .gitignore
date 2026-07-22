@@ -69,3 +69,4 @@ build/
 *.njsproj
 *.sln
 *.sw?
+firebase-applet-config.json
