@@ -7,7 +7,7 @@ import { ListsView } from './components/ListsView';
 import { LoginView } from './components/LoginView';
 import { Home, LogOut } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const App: React.FC = () => {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('cavtory_token'));
