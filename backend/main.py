@@ -23,7 +23,14 @@ gemini_key = os.environ.get("GEMINI_API_KEY")
 if gemini_key:
     genai.configure(api_key=gemini_key)
 
-origins = ["*"]
+frontend_url = os.environ.get("FRONTEND_URL", "https://your-frontend-name.up.railway.app")
+
+# Add your new public frontend URL to this list
+origins = [
+    "http://localhost:5173", # Keeps local development working
+    "http://localhost:3000", # Alternative Vite/React local dev port
+    frontend_url # IMPORTANT: Replace with your actual frontend URL (no trailing slash) or set FRONTEND_URL env var
+]
 
 app.add_middleware(
     CORSMiddleware,
