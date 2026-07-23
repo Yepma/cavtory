@@ -29,6 +29,7 @@ const App: React.FC = () => {
     name: '',
     size: '',
     category: Category.Cooking,
+    productType: '',
     quantity: 1
   });
 
@@ -170,6 +171,7 @@ const App: React.FC = () => {
         name: result.name || '',
         size: result.size || '',
         category: result.category || Category.Cooking,
+        productType: result.product_type || '',
         quantity: 1
       });
       setShowForm(true);
@@ -186,6 +188,7 @@ const App: React.FC = () => {
       name: initialName,
       size: '',
       category: Category.Cooking,
+      productType: '',
       quantity: 1
     });
     setShowForm(true);
@@ -201,6 +204,7 @@ const App: React.FC = () => {
       name: formData.name as string,
       size: formData.size || 'N/A',
       category: formData.category as Category,
+      product_type: formData.productType || '',
       quantity: Number(formData.quantity) || 0,
     };
 
@@ -649,6 +653,28 @@ const App: React.FC = () => {
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-medium text-neutral-400 uppercase mb-2">Product Type</label>
+                    <input 
+                      type="text" 
+                      value={formData.productType || ''} 
+                      onChange={e => setFormData({...formData, productType: e.target.value})}
+                      placeholder="e.g. Cereal"
+                      className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 text-sm placeholder:text-neutral-700 focus:border-neutral-600 focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-400 uppercase mb-2">Category</label>
+                    <select 
+                      value={formData.category} 
+                      onChange={e => setFormData({...formData, category: e.target.value as Category})}
+                      className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 text-sm focus:border-neutral-600 focus:outline-none transition-colors appearance-none"
+                    >
+                      {Object.values(Category).map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
                     <label className="block text-xs font-medium text-neutral-400 uppercase mb-2">Initial Quantity</label>
                     <input 
                       type="number" 
@@ -658,16 +684,6 @@ const App: React.FC = () => {
                       className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 text-sm focus:border-neutral-600 focus:outline-none transition-colors"
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-neutral-400 uppercase mb-2">Category</label>
-                  <select 
-                    value={formData.category} 
-                    onChange={e => setFormData({...formData, category: e.target.value as Category})}
-                    className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 text-sm focus:border-neutral-600 focus:outline-none transition-colors appearance-none"
-                  >
-                    {Object.values(Category).map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
                 </div>
               </div>
 

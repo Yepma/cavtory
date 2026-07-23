@@ -33,6 +33,7 @@ export interface RecognitionResult {
   name?: string;
   size?: string;
   category?: Category;
+  product_type?: string;
 }
 
 export interface ShoppingListItem {
