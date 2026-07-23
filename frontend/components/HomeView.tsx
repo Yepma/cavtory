@@ -21,6 +21,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 }) => {
   const safeInventory = inventory || [];
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
   
   const categoryCounts = Object.values(Category).reduce((acc, cat) => {
     acc[cat] = safeInventory.filter(p => p.category === cat).reduce((sum, p) => sum + (p.quantity || 0), 0);
@@ -131,9 +132,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   )
                   .sort((a, b) => Number(b[1]) - Number(a[1]))
                   .map(([type, qty]) => (
-                    <tr key={type} className="hover:bg-neutral-900/50 transition-colors">
-                      <td className="px-6 py-3 text-sm text-neutral-300">{type}</td>
-                      <td className="px-6 py-3 text-sm text-neutral-300 text-right font-medium">{qty}</td>
+                    <tr 
+                      key={type} 
+                      onClick={() => setSelectedProductType(type)}
+                      className="hover:bg-neutral-800 transition-colors cursor-pointer group"
+                    >
+                      <td className="px-6 py-3 text-sm text-neutral-300 font-medium group-hover:text-emerald-400 transition-colors">{type}</td>
+                      <td className="px-6 py-3 text-sm text-neutral-300 text-right">{qty}</td>
                     </tr>
                   ))}
                   {safeInventory.filter(p => p.category === selectedCategory).length === 0 && (
@@ -149,6 +154,42 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         )}
       </div>
+
+      {selectedProductType && selectedCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-neutral-800 bg-neutral-900/50">
+              <div>
+                <h3 className="text-lg font-medium text-neutral-100">{selectedProductType}</h3>
+                <p className="text-xs text-neutral-500 mt-1 uppercase tracking-wider">{selectedCategory}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedProductType(null)}
+                className="text-neutral-500 hover:text-neutral-200 transition-colors bg-neutral-950 hover:bg-neutral-800 p-2 rounded-full border border-neutral-800"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto">
+              <ul className="space-y-2">
+                {safeInventory
+                  .filter(p => p.category === selectedCategory && (p.productType || 'Uncategorized') === selectedProductType)
+                  .map(p => (
+                    <li key={p.barcodeId} className="flex justify-between items-center bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+                      <div>
+                        <div className="text-sm font-medium text-neutral-200">{p.name}</div>
+                        <div className="text-xs text-neutral-500 mt-1">{p.brand || 'Generic'} &bull; {p.size || 'N/A'}</div>
+                      </div>
+                      <div className="text-sm font-medium text-neutral-400 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-lg">
+                        x{p.quantity}
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
