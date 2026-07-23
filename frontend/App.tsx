@@ -22,6 +22,7 @@ const App: React.FC = () => {
   const [showAdjustment, setShowAdjustment] = useState(false);
   const [lastUpdatedItem, setLastUpdatedItem] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<Product>>({
     barcodeId: '',
@@ -121,34 +122,43 @@ const App: React.FC = () => {
     return <LoginView apiUrl={API_URL} onLoginSuccess={handleLogin} />;
   }
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsProcessing(true);
     setError(null);
     setLastUpdatedItem(null);
 
     const reader = new FileReader();
-    reader.onload = async (event) => {
+    reader.onload = (event) => {
       const base64 = (event.target?.result as string).split(',')[1];
-      try {
-        const res = await authenticatedFetch(`${API_URL}/scan`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ base64_image: base64 })
-        });
-        if (!res.ok) throw new Error('Failed to scan image');
-        const result = await res.json();
-        processRecognition(result);
-      } catch (err) {
-        setError("Failed to analyze image. Please try again.");
-      } finally {
-        setIsProcessing(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }
+      setPreviewImage(base64);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     };
     reader.readAsDataURL(file);
+  };
+
+  const analyzeImage = async () => {
+    if (!previewImage) return;
+    
+    setIsProcessing(true);
+    const imageToAnalyze = previewImage;
+    setPreviewImage(null);
+
+    try {
+      const res = await authenticatedFetch(`${API_URL}/scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64_image: imageToAnalyze })
+      });
+      if (!res.ok) throw new Error('Failed to scan image');
+      const result = await res.json();
+      processRecognition(result);
+    } catch (err) {
+      setError("Failed to analyze image. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const processRecognition = (result: RecognitionResult) => {
@@ -503,9 +513,45 @@ const App: React.FC = () => {
           type="file" 
           ref={fileInputRef} 
           onChange={handleFileUpload} 
-          accept="image/*" 
+          accept="image/*"
+          capture="environment"
           className="hidden" 
         />
+
+        {/* Image Preview State */}
+        {previewImage && !isProcessing && (
+          <div className="fixed inset-0 bg-neutral-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4">
+            <div className="max-w-md w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-6 flex flex-col items-center shadow-2xl animate-in zoom-in-95 duration-300">
+              <h2 className="text-xl font-medium text-neutral-100 mb-6">Review Photo</h2>
+              
+              <div className="w-full aspect-[4/3] bg-neutral-950 rounded-xl border border-neutral-800 overflow-hidden mb-6 flex items-center justify-center">
+                <img 
+                  src={`data:image/jpeg;base64,${previewImage}`} 
+                  alt="Scanned item preview" 
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full">
+                <button 
+                  onClick={() => {
+                    setPreviewImage(null);
+                    fileInputRef.current?.click();
+                  }}
+                  className="px-4 py-3 border border-neutral-700 text-neutral-300 text-sm font-medium rounded-xl hover:bg-neutral-800 hover:text-neutral-100 transition-colors"
+                >
+                  Take Another
+                </button>
+                <button 
+                  onClick={analyzeImage}
+                  className="px-4 py-3 bg-neutral-100 text-neutral-900 text-sm font-medium rounded-xl hover:bg-white transition-colors shadow-sm flex justify-center items-center gap-2"
+                >
+                  Ok <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Global Error Banner */}
         {error && (
